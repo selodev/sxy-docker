@@ -1,0 +1,104 @@
+# docker-compose.yml
+#
+# Usage:
+#   export PORT=
+#   export CLOUD_RUN_SERVICE_NAME=
+#   export DATABASE_CLIENT=mongo
+#   export DATABASE_HOST=mongo
+#   export DATABASE_PORT=27017
+#   export DATABASE_NAME=strapi
+#   export DATABASE_USERNAME=strapi
+#   export DATABASE_PASSWORD=strapi
+#   export MONGO_INITDB_DATABASE=strapi
+#   export MONGO_INITDB_ROOT_USERNAME=strapi
+#   export MONGO_INITDB_ROOT_PASSWORD=strapi
+# What can you do with this?
+# Create and start all configured services with docker-compose up.
+# Build your container images for local use with docker-compose build.
+
+version: '3.7'
+
+services:
+  # Backend
+  backend:
+    build:
+        context: ./backend
+        dockerfile: Dockerfile
+    image: backend:local
+    container_name: strapi-backend
+    #restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_CLIENT: ${DATABASE_CLIENT} 
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      #AUTHENTICATION_DATABASE: ${AUTHENTICATION_DATABASE}
+    networks:
+      - strapi_network
+    volumes:
+      - ./backend:/usr/src/app #It's in the Filesystem Hierarchy Standard (FHS).
+    ports:
+      - '1337:1337'
+    depends_on:
+      - mongo
+
+  # Frontend
+  frontend:
+    build:
+        context: ./frontend
+        dockerfile: Dockerfile
+    image: frontend:local
+    container_name: strapi-frontend
+    env_file: .env
+    environment:
+      - API_BASEURL=http://localhost:1337
+      - NEXT_PUBLIC_API_URL=http://localhost:1337
+    networks:
+      - strapi_network
+    volumes:
+      - ./frontend:/usr/src/app
+    ports:
+      - '3100:3000'
+    depends_on:
+      - backend
+
+  # Database
+  mongo:
+    image: mongo
+    container_name: strapi-mongo
+    env_file: .env
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    networks:
+      - strapi_network
+    volumes:
+        - ./db:/data/db
+    ports:
+      - '27017:27017'
+    restart: unless-stopped
+
+  # Mongo DB Client
+  mongoclient:
+    image: mongoclient/mongoclient
+    container_name: strapi-mongoclient
+    environment:
+      - MONGOCLIENT_DEFAULT_CONNECTION_URL=mongodb://localhost:27017/strapi
+    ports:
+      - '3300:3000'
+    networks:
+      - strapi_network
+    depends_on:
+      - mongo
+
+networks:
+  strapi_network:
+    driver: bridge
+    name: strapi_network
+
+volumes:
+  strapi-data:

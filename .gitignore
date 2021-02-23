@@ -1,0 +1,4 @@
+.env
+db
+mkcert/certs
+webserver/nginx/certs
