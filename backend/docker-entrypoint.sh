@@ -3,7 +3,7 @@
 set -ea
 
 if [ ! -f "package.json" ]; then
-    echo "No package.json found at /usr/src/app."
+    echo "No package.json found at /src/app."
 else
     if [ ! -d "node_modules" ] || [ ! "$(ls -qAL node_modules 2>/dev/null)" ]; then
         echo "Node modules not installed."

@@ -16,7 +16,7 @@
 # Create and start all configured services with docker-compose up.
 # Build your container images for local use with docker-compose build.
 
-version: '3.7'
+version: '3.9'
 
 services:
   # Backend
@@ -24,7 +24,7 @@ services:
     build:
         context: ./backend
         dockerfile: Dockerfile
-    image: backend:local
+    image: strapi-backend:local
     container_name: strapi-backend
     #restart: unless-stopped
     env_file: .env
@@ -39,7 +39,7 @@ services:
     networks:
       - strapi_network
     volumes:
-      - ./backend:/usr/src/app #It's in the Filesystem Hierarchy Standard (FHS).
+      - ./backend/code:/srv/app #It's in the Filesystem Hierarchy Standard (FHS).
     ports:
       - '1337:1337'
     depends_on:
@@ -50,7 +50,7 @@ services:
     build:
         context: ./frontend
         dockerfile: Dockerfile
-    image: frontend:local
+    image: strapi-frontend:local
     container_name: strapi-frontend
     env_file: .env
     environment:
@@ -59,7 +59,7 @@ services:
     networks:
       - strapi_network
     volumes:
-      - ./frontend:/usr/src/app
+      - ./frontend/code:/srv/app # srv stands for services which require a single tree for readonly data, writable data and scripts
     ports:
       - '3100:3000'
     depends_on:
