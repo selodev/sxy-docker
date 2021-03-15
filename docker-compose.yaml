@@ -39,11 +39,11 @@ services:
     networks:
       - strapi_network
     volumes:
-      - ./backend/code:/srv/app #It's in the Filesystem Hierarchy Standard (FHS).
+      - ./backend/app:/srv/app #It's in the Filesystem Hierarchy Standard (FHS).
     ports:
       - '1337:1337'
     depends_on:
-      - mongo
+      - strapimongo
 
   # Frontend
   frontend:
@@ -66,18 +66,17 @@ services:
       - backend
 
   # Database
-  mongo:
+  strapimongo:
     image: mongo
-    container_name: strapi-mongo
+    container_name: strapimongo
     env_file: .env
     environment:
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     networks:
       - strapi_network
     volumes:
-        - ./db:/data/db
+        - strapi-data:/data/db
     ports:
       - '27017:27017'
     restart: unless-stopped
@@ -93,7 +92,7 @@ services:
     networks:
       - strapi_network
     depends_on:
-      - mongo
+      - strapimongo
 
 networks:
   strapi_network:

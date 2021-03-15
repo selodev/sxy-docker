@@ -8,10 +8,10 @@ WORKDIR /srv/app
 # Copy application dependency manifests to the container image.
 # A wildcard is used to ensure both package.json AND package-lock.json are copied.
 # Copying this separately prevents re-running npm install on every code change.
-COPY ./code/package*.json .
+COPY app/package*.json ./
 
 # Copy local code to the container image.
-COPY ./code .
+COPY app ./
 
 # Expose Container PORT
 EXPOSE 1337
